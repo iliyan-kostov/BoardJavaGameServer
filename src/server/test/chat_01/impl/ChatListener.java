@@ -2,8 +2,8 @@ package server.test.chat_01.impl;
 
 import server.AbstrctClientExecutor;
 import server.communication.Message;
-import server.test.chat_01.heandlers.LoginHandler;
-import server.test.chat_01.heandlers.MessageHandler;
+import server.test.chat_01.handlers.LoginHandler;
+import server.test.chat_01.handlers.MessageHandler;
 
 public class ChatListener extends AbstrctClientExecutor {
 

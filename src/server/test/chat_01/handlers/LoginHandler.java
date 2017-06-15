@@ -1,4 +1,4 @@
-package server.test.chat_01.heandlers;
+package server.test.chat_01.handlers;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

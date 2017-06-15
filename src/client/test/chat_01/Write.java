@@ -1,3 +1,5 @@
+package client.test.chat_01;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package server.test.chat_01.handlers;
+package tests.chat_01.server.handlers;
 
 import java.io.IOException;
 

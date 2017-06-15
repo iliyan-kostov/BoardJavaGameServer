@@ -1,4 +1,4 @@
-package server.test.chat_01;
+package tests.chat_01.server;
 
 import server.impl.DefaultListener;
 import server.impl.Server;

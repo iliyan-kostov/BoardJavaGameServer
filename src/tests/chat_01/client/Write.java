@@ -1,4 +1,4 @@
-package client.test.chat_01;
+package tests.chat_01.client;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

@@ -1,8 +1,7 @@
 package game.board;
 
-import game.IMessageHandler;
-import game.IMessageSender;
-import game.protocol.Message_Board;
+import protocol.interfaces.IMessageHandler;
+import protocol.interfaces.IMessageSender;
 
 /**
  * <p>

@@ -1,4 +1,4 @@
-package game.protocol;
+package protocol;
 
 /**
  * <p>
@@ -8,10 +8,7 @@ package game.protocol;
  */
 public final class Message_Auth_Logout extends Message_Auth {
 
-    public final String password;
-
-    public Message_Auth_Logout(String username, String password) {
+    public Message_Auth_Logout(String username) {
         super(username, Message.MESSAGETYPE.AUTH_LOGOUT);
-        this.password = password;
     }
 }

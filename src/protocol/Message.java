@@ -1,4 +1,4 @@
-package game.protocol;
+package protocol;
 
 /**
  * <p>
@@ -38,6 +38,7 @@ public abstract class Message implements java.io.Serializable {
         LOBBY_PLAYERSTATS, // игрални статистики за даден потребител (К -> С -> К)
         LOBBY_RANKING, // класация за даден режим на игра и горна/долна граница (К -> С -> К)
         LOBBY_NEWGAMEREQUEST, // заявка за нова игра от определен режим (К -> С -> К)
+        LOBBY_SYNC, // синхронизиращо съобщение за лоби (С -> К)
         BOARD_GAMESTARTED, // стартирана игра, в която потребителят участва (С -> К)
         BOARD_GAMESYNC, // синхронизиращо съобщение за игра (С -> К)
         BOARD_MOVEFIGURES, // местене на фигури (К -> С -> К; С -> К)

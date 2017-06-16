@@ -1,4 +1,4 @@
-package game.protocol;
+package protocol;
 
 import game.lobby.PlayerStat;
 

@@ -1,10 +1,10 @@
-package game;
+package protocol.interfaces;
 
-import game.protocol.Message;
+import protocol.Message;
 
 /**
  * Описва възможността на клас да изпраща съобщения от типа
- * {@link game.protocol.Message}.
+ * {@link protocol.Message}.
  *
  * @author iliyan-kostov <https://github.com/iliyan-kostov/>
  */

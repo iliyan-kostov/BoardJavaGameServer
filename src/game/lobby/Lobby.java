@@ -1,8 +1,7 @@
 package game.lobby;
 
-import game.IMessageHandler;
-import game.IMessageSender;
-import game.protocol.Message_Lobby;
+import protocol.interfaces.IMessageHandler;
+import protocol.interfaces.IMessageSender;
 
 /**
  * <p>

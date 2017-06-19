@@ -126,4 +126,8 @@ public class AppServer extends Application implements PropertyChangeListener {
             break;
         }
     }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

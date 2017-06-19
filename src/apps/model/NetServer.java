@@ -119,10 +119,11 @@ public class NetServer {
                 this.stopConnection(connection);
             }
         }
-        try {
-            throw new UnsupportedOperationException("Closing active connections from server - not yet implemented !!!");
-        } catch (UnsupportedOperationException ex) {
-            Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
+        for (Map.Entry<String, NetServersideConnection> entry : connectionsByUsername.entrySet()) {
+            if ((entry != null) && (entry.getValue() != null)) {
+                NetServersideConnection connection = entry.getValue();
+                this.stopConnection(connection);
+            }
         }
         this.connectionsById.clear();
         this.connectionsByUsername.clear();

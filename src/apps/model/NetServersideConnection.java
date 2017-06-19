@@ -1,7 +1,5 @@
 package apps.model;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -35,8 +33,8 @@ public class NetServersideConnection extends Thread implements IMessageSender, I
     @Override
     public void run() {
         try {
-            this.inputStream = (ObjectInputStream) (this.socket.getInputStream());
-            this.outputStream = (ObjectOutputStream) (this.socket.getOutputStream());
+            this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+            this.inputStream = new ObjectInputStream(this.socket.getInputStream());
             // authenticate:
             try {
                 Message_Auth_Login loginMessage = (Message_Auth_Login) (this.inputStream.readObject());

@@ -43,9 +43,12 @@ public class NetServersideConnection extends Thread implements IMessageSender, I
                 while ((this.inputStream != null) && (!(this.socket.isClosed()))) {
                     try {
                         Message input = (Message) this.inputStream.readObject();
+                        if (input.messageType == Message.MESSAGETYPE.AUTH_LOGIN) {
+                            throw new IllegalArgumentException("Client attempting a double log in!");
+                        }
                         input.username = this.username;
                         this.handleMessage(input);
-                    } catch (IOException | ClassNotFoundException ex) {
+                    } catch (IOException | ClassNotFoundException | IllegalArgumentException ex) {
                         Logger.getLogger(NetServersideConnection.class.getName()).log(Level.SEVERE, null, ex);
                         this.server.stopConnection(this);
                     }

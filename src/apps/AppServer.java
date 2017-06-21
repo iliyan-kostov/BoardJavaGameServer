@@ -1,6 +1,5 @@
 package apps;
 
-import apps.model.NetServer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
@@ -91,7 +90,7 @@ public class AppServer extends Application implements PropertyChangeListener {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         this.root.getChildren().clear();
         this.root.setAlignment(Pos.CENTER);
         this.root.setSpacing(10);

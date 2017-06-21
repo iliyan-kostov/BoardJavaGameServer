@@ -1,4 +1,4 @@
-package apps.model;
+package apps;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -16,6 +16,8 @@ import protocol.interfaces.IMessageSender;
 
 public class NetClientsideConnection extends Thread implements IMessageSender, IMessageHandler {
 
+    private final NetClient client;
+
     private final PropertyChangeSupport pcs;
 
     protected final Socket socket;
@@ -24,8 +26,9 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
 
-    public NetClientsideConnection(Socket socket, String username, String password) {
+    public NetClientsideConnection(NetClient client, Socket socket, String username, String password) {
         super();
+        this.client = client;
         this.pcs = new PropertyChangeSupport(this);
         this.socket = socket;
         this.username = username;
@@ -96,6 +99,6 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
 
     @Override
     public synchronized void handleMessage(Message message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.client.handleMessage(message);
     }
 }

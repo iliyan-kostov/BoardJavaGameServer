@@ -1,4 +1,4 @@
-package apps.model;
+package apps;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -8,9 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import protocol.Message;
 import protocol.Message_Auth_Login;
+import protocol.interfaces.IMessageHandler;
+import protocol.interfaces.IMessageSender;
 
-public class NetServer {
+public class NetServer implements IMessageSender, IMessageHandler {
 
     private final PropertyChangeSupport pcs;
 
@@ -20,8 +23,8 @@ public class NetServer {
     private boolean isServerRunning;
     private int nextConnectionId;
 
-    private final HashMap<Integer, NetServersideConnection> connectionsById;
-    private final HashMap<String, NetServersideConnection> connectionsByUsername;
+    protected final HashMap<Integer, NetServersideConnection> connectionsById;
+    protected final HashMap<String, NetServersideConnection> connectionsByUsername;
 
     public NetServer() {
         this.pcs = new PropertyChangeSupport(this);
@@ -176,5 +179,18 @@ public class NetServer {
                 stopConnection(connection);
             }
         }
+    }
+
+    @Override
+    public synchronized void sendMessage(Message message) {
+        NetServersideConnection connection = this.connectionsByUsername.get(message.username);
+        if (connection != null) {
+            connection.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void handleMessage(Message message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

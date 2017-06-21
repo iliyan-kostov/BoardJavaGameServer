@@ -1,6 +1,5 @@
 package apps;
 
-import apps.model.NetClientsideConnection;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 
 public class AppClient extends Application implements PropertyChangeListener {
 
-    private NetClientsideConnection connection;
+    private NetClient client;
 
     private final Label lblStatus;
     private final Label lblHostname;
@@ -44,7 +44,7 @@ public class AppClient extends Application implements PropertyChangeListener {
 
     public AppClient() {
         super();
-        this.connection = null;
+        this.client = null;
         this.btnConnect = new Button("Connect");
         this.btnDisconnect = new Button("Disconnect");
         this.lblStatus = new Label("Status");
@@ -56,7 +56,7 @@ public class AppClient extends Application implements PropertyChangeListener {
         this.tfPort = new TextField();
         this.tfUsername = new TextField();
         this.tfPassword = new TextField();
-        this.lblStatus2 = new Circle(10);
+        this.lblStatus2 = new Circle(5);
 
         this.root = new GridPane();
 
@@ -79,9 +79,9 @@ public class AppClient extends Application implements PropertyChangeListener {
             try {
                 Socket socket = new Socket(hostname, port);
                 {
-                    this.connection = new NetClientsideConnection(socket, username, password);
-                    this.connection.addPropertyChangeListener(this);
-                    this.connection.start();
+                    this.client = new NetClient(socket, username, password);
+                    this.client.addPropertyChangeListener(this);
+                    this.client.startConnection();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -89,18 +89,24 @@ public class AppClient extends Application implements PropertyChangeListener {
         } catch (NumberFormatException ex) {
             Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if ((this.connection != null) && (this.connection.isAlive())) {
+        if ((this.client != null) && (this.client.isRunning())) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Connected to server!");
+            alert.showAndWait();
             this.setRunning();
         } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Could not connect to server!");
+            alert.showAndWait();
             this.stopClient();
         }
     }
 
     public synchronized void stopClient() {
-        if (this.connection != null) {
-            this.connection.stopConnection();
-            this.connection = null;
+        if (this.client != null) {
+            this.client.stopConnection();
         }
+        this.client = null;
         this.setNotRunning();
     }
 
@@ -125,7 +131,7 @@ public class AppClient extends Application implements PropertyChangeListener {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         this.root.getChildren().clear();
         this.root.setAlignment(Pos.CENTER);
         this.root.setPadding(new Insets(25));

@@ -1,4 +1,4 @@
-package apps.model;
+package apps;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -75,6 +75,6 @@ public class NetServersideConnection extends Thread implements IMessageSender, I
 
     @Override
     public synchronized void handleMessage(Message message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.server.handleMessage(message);
     }
 }

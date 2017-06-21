@@ -16,6 +16,7 @@ import protocol.interfaces.IMessageSender;
 public class NetServer implements IMessageSender, IMessageHandler {
 
     private final PropertyChangeSupport pcs;
+    private final Database database;
 
     private int port;
     protected ServerSocket serverSocket;
@@ -28,6 +29,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
 
     public NetServer() {
         this.pcs = new PropertyChangeSupport(this);
+        this.database = new Database(null); // set string of leave null for default !!!
         this.port = -1;
         this.serverSocket = null;
         this.acceptingThread = null;
@@ -166,8 +168,8 @@ public class NetServer implements IMessageSender, IMessageHandler {
         } else {
             String login = loginMessage.username;
             String password = loginMessage.password;
-            // check database !!!
-            boolean loginMatchesPassword = true;
+            // check database:
+            boolean loginMatchesPassword = this.database.authenticateUser(login, password);
             if (loginMatchesPassword) {
                 connection.username = login;
                 NetServersideConnection existing = this.connectionsByUsername.get(login);

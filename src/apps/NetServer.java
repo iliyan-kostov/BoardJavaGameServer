@@ -218,32 +218,20 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 this.userLogout(message.username);
             }
             break;
-            case BOARD_ENDGAME: {
-                // TODO
-            }
-            break;
             case BOARD_ENDTURN: {
-                // TODO
-            }
-            break;
-            case BOARD_GAMESTARTED: {
-                // TODO
-            }
-            break;
-            case BOARD_GAMESYNC: {
-                // TODO
+                this.gameManager.handleMessage(message);
             }
             break;
             case BOARD_MOVEFIGURES: {
-                // TODO
+                this.gameManager.handleMessage(message);
             }
             break;
             case BOARD_REMOVEFIGURES: {
-                // TODO
+                this.gameManager.handleMessage(message);
             }
             break;
             case BOARD_SURRENDER: {
-                // TODO
+                this.gameManager.handleMessage(message);
             }
             break;
             case LOBBY_NEWGAMEREQUEST: {
@@ -258,10 +246,6 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 // TODO
             }
             break;
-            case LOBBY_SYNC: {
-                // TODO
-            }
-            break;
             default: {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
@@ -273,8 +257,8 @@ public class NetServer implements IMessageSender, IMessageHandler {
             NetServersideConnection connection = this.connectionsByUsername.get(username);
             if (connection != null) {
                 this.stopConnection(connection);
-                // Notify the client's active games and/or game queues, etc.:
             }
+            // Notify the client's active games and/or game queues, etc.:
             this.pcs.firePropertyChange(NetServer.EVENT_USER_LOGOUT, null, username);
         }
     }

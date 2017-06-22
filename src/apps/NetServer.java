@@ -94,8 +94,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
 
                 }
             } catch (IOException ex) {
-                Logger.getLogger(NetServer.class
-                        .getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
                 // stop the server:
                 this.stop();
             }
@@ -114,8 +113,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 this.serverSocket.close();
 
             } catch (IOException ex1) {
-                Logger.getLogger(NetServer.class
-                        .getName()).log(Level.SEVERE, null, ex1);
+                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
         this.serverSocket = null;
@@ -126,8 +124,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 this.acceptingThread.join();
 
             } catch (InterruptedException ex1) {
-                Logger.getLogger(NetServer.class
-                        .getName()).log(Level.SEVERE, null, ex1);
+                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
         this.acceptingThread = null;
@@ -159,8 +156,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
                     connection.socket.close();
 
                 } catch (IOException ex) {
-                    Logger.getLogger(NetServer.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             this.connectionsById.remove(connection.id);
@@ -251,7 +247,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
             }
             break;
             case LOBBY_NEWGAMEREQUEST: {
-                // TODO
+                this.gameManager.handleMessage(message);
             }
             break;
             case LOBBY_PLAYERSTATS: {

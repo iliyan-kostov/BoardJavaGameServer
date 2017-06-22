@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import protocol.Message;
 import protocol.Message_Auth_Login;
-import protocol.Message_Auth_Logout;
 import protocol.interfaces.IMessageHandler;
 import protocol.interfaces.IMessageSender;
 
@@ -54,7 +53,6 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
             this.pcs.firePropertyChange("isClientRunning", false, true);
             // authenticate:
             this.sendMessage(new Message_Auth_Login(this.username, this.password));
-            this.sendMessage(new Message_Auth_Logout(this.username));
             // loop:
             boolean keepRunning = true;
             while (keepRunning && (this.inputStream != null) && (!(this.socket.isClosed()))) {

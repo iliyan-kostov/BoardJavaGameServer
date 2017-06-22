@@ -139,18 +139,19 @@ public class NetServer implements IMessageSender, IMessageHandler {
     }
 
     public synchronized void stopConnection(NetServersideConnection connection) {
-        while ((connection != null) && (connection.socket != null) && (!(connection.socket.isClosed()))) {
-            try {
-                connection.socket.close();
-            } catch (IOException ex) {
-                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        if (connection != null) {
-            if (connection.username != null) {
-                this.connectionsByUsername.remove(connection.username);
+        if ((connection != null) && (connection.socket != null) && (!(connection.socket.isClosed()))) {
+            while (!(connection.socket.isClosed())) {
+                try {
+                    connection.socket.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             this.connectionsById.remove(connection.id);
+            if (connection.username != null) {
+                this.connectionsByUsername.remove(connection.username);
+                this.userLogout(connection.username);
+            }
             this.pcs.firePropertyChange("connectionStopped", null, connection);
         }
     }
@@ -171,14 +172,17 @@ public class NetServer implements IMessageSender, IMessageHandler {
             // check database:
             boolean loginMatchesPassword = this.database.authenticateUser(login, password);
             if (loginMatchesPassword) {
-                connection.username = login;
                 NetServersideConnection existing = this.connectionsByUsername.get(login);
-                this.stopConnection(existing);
-                this.connectionsByUsername.remove(login);
-                this.connectionsByUsername.put(login, connection);
-                this.pcs.firePropertyChange("connectionAuthenticated", null, connection);
+                if (existing != null) {
+                    // do not allow multiple logins with the same username:
+                    this.stopConnection(connection);
+                } else {
+                    connection.username = login;
+                    this.connectionsByUsername.put(login, connection);
+                    this.pcs.firePropertyChange("connectionAuthenticated", null, connection);
+                }
             } else {
-                stopConnection(connection);
+                this.stopConnection(connection);
             }
         }
     }
@@ -193,6 +197,73 @@ public class NetServer implements IMessageSender, IMessageHandler {
 
     @Override
     public synchronized void handleMessage(Message message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        switch (message.messageType) {
+            case AUTH_LOGIN: {
+                // handled by connection thread
+            }
+            break;
+            case AUTH_LOGOUT: {
+                this.userLogout(message.username);
+            }
+            break;
+            case BOARD_ENDGAME: {
+                // TODO
+            }
+            break;
+            case BOARD_ENDTURN: {
+                // TODO
+            }
+            break;
+            case BOARD_GAMESTARTED: {
+                // TODO
+            }
+            break;
+            case BOARD_GAMESYNC: {
+                // TODO
+            }
+            break;
+            case BOARD_MOVEFIGURES: {
+                // TODO
+            }
+            break;
+            case BOARD_REMOVEFIGURES: {
+                // TODO
+            }
+            break;
+            case BOARD_SURRENDER: {
+                // TODO
+            }
+            break;
+            case LOBBY_NEWGAMEREQUEST: {
+                // TODO
+            }
+            break;
+            case LOBBY_PLAYERSTATS: {
+                // TODO
+            }
+            break;
+            case LOBBY_RANKING: {
+                // TODO
+            }
+            break;
+            case LOBBY_SYNC: {
+                // TODO
+            }
+            break;
+            default: {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        }
+    }
+
+    public synchronized void userLogout(String username) {
+        if (username != null) {
+            NetServersideConnection connection = this.connectionsByUsername.get(username);
+            if (connection != null) {
+                this.stopConnection(connection);
+                // Notify the client's active games and/or game queues, etc.:
+            }
+            this.pcs.firePropertyChange("userLogout", null, username);
+        }
     }
 }

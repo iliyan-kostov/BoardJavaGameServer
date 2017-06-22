@@ -120,7 +120,6 @@ public class AppServer extends Application implements PropertyChangeListener {
             }
             break;
             default: {
-
             }
             break;
         }

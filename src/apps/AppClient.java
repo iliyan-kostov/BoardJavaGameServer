@@ -150,7 +150,6 @@ public class AppClient extends Application implements PropertyChangeListener {
         switch (evt.getPropertyName()) {
             case "isClientRunning": {
                 boolean isRunning = (boolean) evt.getNewValue();
-                System.out.println("Received pce \"isClientRunning\": " + isRunning);
                 if (isRunning) {
                     this.setRunning();
                     // show alert in FX UI:

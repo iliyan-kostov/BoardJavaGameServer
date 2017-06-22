@@ -22,6 +22,7 @@ public class NetServerAcceptingThread extends Thread {
             try {
                 Socket socket = this.serverSocket.accept();
                 NetServersideConnection connection = new NetServersideConnection(this.server, socket, null, this.server.getNextConnectionId());
+                this.server.connectionsById.put(connection.id, connection);
                 this.server.startConnection(connection);
             } catch (IOException ex) {
                 Logger.getLogger(NetServerAcceptingThread.class.getName()).log(Level.SEVERE, null, ex);

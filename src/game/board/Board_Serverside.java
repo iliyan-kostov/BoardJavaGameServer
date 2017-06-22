@@ -2,6 +2,13 @@ package game.board;
 
 import apps.GameManager;
 import protocol.Message;
+import protocol.Message_Board_EndGame;
+import protocol.Message_Board_EndTurn;
+import protocol.Message_Board_GameStarted;
+import protocol.Message_Board_GameSync;
+import protocol.Message_Board_MoveFigures;
+import protocol.Message_Board_RemoveFigures;
+import protocol.Message_Board_Surrender;
 
 /**
  * <p>
@@ -24,32 +31,44 @@ public class Board_Serverside extends Board {
     }
 
     @Override
-    public synchronized void handleMessage(Message message) {
-        switch (message.messageType) {
-            case BOARD_ENDTURN: {
-                // TODO
-            }
-            break;
-            case BOARD_MOVEFIGURES: {
-                // TODO
-            }
-            break;
-            case BOARD_REMOVEFIGURES: {
-                // TODO
-            }
-            break;
-            case BOARD_SURRENDER: {
-                // TODO
-            }
-            break;
-            default: {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        }
+    public void handleGameStarted(Message_Board_GameStarted message) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public synchronized void userLogout(String username) {
+    public void handleGameSync(Message_Board_GameSync message) {
         // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public synchronized void handleMoveFigures(Message_Board_MoveFigures message) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public synchronized void handleRemoveFigures(Message_Board_RemoveFigures message) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public synchronized void handleEndTurn(Message_Board_EndTurn message) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public synchronized void handleEndGame(Message_Board_EndGame message) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public synchronized void handleSurrender(Message_Board_Surrender message) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

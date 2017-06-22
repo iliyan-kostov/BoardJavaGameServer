@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import protocol.Message;
 import protocol.Message_Board;
 import protocol.Message_Board_GameStarted;
+import protocol.Message_Board_Surrender;
 import protocol.Message_Lobby_NewGameRequest;
 import protocol.interfaces.IMessageHandler;
 import protocol.interfaces.IMessageSender;
@@ -98,9 +99,9 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case NetServer.EVENT_USER_LOGOUT: {
-                String username = (String) evt.getNewValue();
-                Board_Serverside board = this.boardsById.get(username);
-                board.userLogout(username);
+                String playerSurrenders = (String) evt.getNewValue();
+                Board_Serverside board = this.boardsByUsername.get(playerSurrenders);
+                board.handleSurrender(new Message_Board_Surrender(playerSurrenders, board.boardId, playerSurrenders));
             }
             break;
             default: {

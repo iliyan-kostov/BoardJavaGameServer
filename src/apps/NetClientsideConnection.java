@@ -10,11 +10,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import protocol.Message;
 import protocol.Message_Auth_Login;
-import protocol.Message_Auth_Logout;
 import protocol.interfaces.IMessageHandler;
 import protocol.interfaces.IMessageSender;
 
 public class NetClientsideConnection extends Thread implements IMessageSender, IMessageHandler {
+
+    public static final String EVENT_IS_CLIENT_RUNNING = "isClientRunning";
 
     private final NetClient client;
 
@@ -51,9 +52,9 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         try {
             this.inputStream = new ObjectInputStream(this.socket.getInputStream());
             this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+            this.pcs.firePropertyChange(NetClientsideConnection.EVENT_IS_CLIENT_RUNNING, false, true);
             // authenticate:
             this.sendMessage(new Message_Auth_Login(this.username, this.password));
-            this.sendMessage(new Message_Auth_Logout(this.username));
             // loop:
             boolean keepRunning = true;
             while (keepRunning && (this.inputStream != null) && (!(this.socket.isClosed()))) {
@@ -71,6 +72,7 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         }
         // stop connection:
         this.stopConnection();
+        this.pcs.firePropertyChange(NetClientsideConnection.EVENT_IS_CLIENT_RUNNING, true, false);
     }
 
     public synchronized void stopConnection() {
@@ -83,7 +85,6 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         }
         this.inputStream = null;
         this.outputStream = null;
-        this.pcs.firePropertyChange("isClientRunning", true, false);
     }
 
     @Override

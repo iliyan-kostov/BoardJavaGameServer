@@ -15,6 +15,8 @@ import protocol.interfaces.IMessageSender;
 
 public class NetClientsideConnection extends Thread implements IMessageSender, IMessageHandler {
 
+    public static final String EVENT_IS_CLIENT_RUNNING = "isClientRunning";
+
     private final NetClient client;
 
     private final PropertyChangeSupport pcs;
@@ -50,7 +52,7 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         try {
             this.inputStream = new ObjectInputStream(this.socket.getInputStream());
             this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
-            this.pcs.firePropertyChange("isClientRunning", false, true);
+            this.pcs.firePropertyChange(NetClientsideConnection.EVENT_IS_CLIENT_RUNNING, false, true);
             // authenticate:
             this.sendMessage(new Message_Auth_Login(this.username, this.password));
             // loop:
@@ -70,7 +72,7 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         }
         // stop connection:
         this.stopConnection();
-        this.pcs.firePropertyChange("isClientRunning", true, false);
+        this.pcs.firePropertyChange(NetClientsideConnection.EVENT_IS_CLIENT_RUNNING, true, false);
     }
 
     public synchronized void stopConnection() {

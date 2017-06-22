@@ -110,7 +110,7 @@ public class AppServer extends Application implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "isServerRunning": {
+            case NetServer.EVENT_IS_SERVER_RUNNING: {
                 boolean isRunning = (boolean) evt.getNewValue();
                 if (isRunning) {
                     this.setRunning();

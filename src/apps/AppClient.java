@@ -148,7 +148,7 @@ public class AppClient extends Application implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "isClientRunning": {
+            case NetClientsideConnection.EVENT_IS_CLIENT_RUNNING: {
                 boolean isRunning = (boolean) evt.getNewValue();
                 if (isRunning) {
                     this.setRunning();
@@ -178,7 +178,6 @@ public class AppClient extends Application implements PropertyChangeListener {
             }
             break;
             default: {
-
             }
             break;
         }

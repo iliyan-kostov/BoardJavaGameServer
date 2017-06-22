@@ -15,8 +15,15 @@ import protocol.interfaces.IMessageSender;
 
 public class NetServer implements IMessageSender, IMessageHandler {
 
+    public final static String EVENT_IS_SERVER_RUNNING = "isServerRinning";
+    public final static String EVENT_CONNECTION_STARTED = "connectionStarted";
+    public final static String EVENT_CONNECTION_STOPPED = "connectionStopped";
+    public final static String EVENT_CONNECTION_AUTHENTICATED = "connectionAuthenticated";
+    public final static String EVENT_USER_LOGOUT = "userLogout";
+
     private final PropertyChangeSupport pcs;
     private final Database database;
+    private final GameManager gameManager;
 
     private int port;
     protected ServerSocket serverSocket;
@@ -30,6 +37,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
     public NetServer() {
         this.pcs = new PropertyChangeSupport(this);
         this.database = new Database(null); // set string of leave null for default !!!
+        this.gameManager = new GameManager(this);
         this.port = -1;
         this.serverSocket = null;
         this.acceptingThread = null;
@@ -55,7 +63,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
     private synchronized void setServerRunning(boolean isServerRunning) {
         boolean oldValue = this.isServerRunning;
         this.isServerRunning = isServerRunning;
-        this.pcs.firePropertyChange("isServerRunning", oldValue, this.isServerRunning);
+        this.pcs.firePropertyChange(NetServer.EVENT_IS_SERVER_RUNNING, oldValue, this.isServerRunning);
     }
 
     public synchronized boolean isServerRunning() {
@@ -83,9 +91,11 @@ public class NetServer implements IMessageSender, IMessageHandler {
                     this.acceptingThread = new NetServerAcceptingThread(this, this.serverSocket);
                     this.acceptingThread.start();
                     this.setServerRunning(true);
+
                 }
             } catch (IOException ex) {
-                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(NetServer.class
+                        .getName()).log(Level.SEVERE, null, ex);
                 // stop the server:
                 this.stop();
             }
@@ -102,8 +112,10 @@ public class NetServer implements IMessageSender, IMessageHandler {
         while ((this.serverSocket != null) && (!(this.serverSocket.isClosed()))) {
             try {
                 this.serverSocket.close();
+
             } catch (IOException ex1) {
-                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex1);
+                Logger.getLogger(NetServer.class
+                        .getName()).log(Level.SEVERE, null, ex1);
             }
         }
         this.serverSocket = null;
@@ -112,8 +124,10 @@ public class NetServer implements IMessageSender, IMessageHandler {
             this.acceptingThread.interrupt();
             try {
                 this.acceptingThread.join();
+
             } catch (InterruptedException ex1) {
-                Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex1);
+                Logger.getLogger(NetServer.class
+                        .getName()).log(Level.SEVERE, null, ex1);
             }
         }
         this.acceptingThread = null;
@@ -143,8 +157,10 @@ public class NetServer implements IMessageSender, IMessageHandler {
             while (!(connection.socket.isClosed())) {
                 try {
                     connection.socket.close();
+
                 } catch (IOException ex) {
-                    Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(NetServer.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
             this.connectionsById.remove(connection.id);
@@ -152,13 +168,13 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 this.connectionsByUsername.remove(connection.username);
                 this.userLogout(connection.username);
             }
-            this.pcs.firePropertyChange("connectionStopped", null, connection);
+            this.pcs.firePropertyChange(NetServer.EVENT_CONNECTION_STOPPED, null, connection);
         }
     }
 
     public synchronized void startConnection(NetServersideConnection connection) {
         if (connection != null) {
-            this.pcs.firePropertyChange("connectionStarted", null, connection);
+            this.pcs.firePropertyChange(NetServer.EVENT_CONNECTION_STARTED, null, connection);
             connection.start();
         }
     }
@@ -179,7 +195,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 } else {
                     connection.username = login;
                     this.connectionsByUsername.put(login, connection);
-                    this.pcs.firePropertyChange("connectionAuthenticated", null, connection);
+                    this.pcs.firePropertyChange(NetServer.EVENT_CONNECTION_AUTHENTICATED, null, connection);
                 }
             } else {
                 this.stopConnection(connection);
@@ -263,7 +279,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 this.stopConnection(connection);
                 // Notify the client's active games and/or game queues, etc.:
             }
-            this.pcs.firePropertyChange("userLogout", null, username);
+            this.pcs.firePropertyChange(NetServer.EVENT_USER_LOGOUT, null, username);
         }
     }
 }

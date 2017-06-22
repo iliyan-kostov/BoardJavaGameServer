@@ -51,6 +51,7 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         try {
             this.inputStream = new ObjectInputStream(this.socket.getInputStream());
             this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+            this.pcs.firePropertyChange("isClientRunning", false, true);
             // authenticate:
             this.sendMessage(new Message_Auth_Login(this.username, this.password));
             this.sendMessage(new Message_Auth_Logout(this.username));
@@ -71,6 +72,7 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         }
         // stop connection:
         this.stopConnection();
+        this.pcs.firePropertyChange("isClientRunning", true, false);
     }
 
     public synchronized void stopConnection() {
@@ -83,7 +85,6 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
         }
         this.inputStream = null;
         this.outputStream = null;
-        this.pcs.firePropertyChange("isClientRunning", true, false);
     }
 
     @Override

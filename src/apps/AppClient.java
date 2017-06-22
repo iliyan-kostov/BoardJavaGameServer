@@ -89,17 +89,6 @@ public class AppClient extends Application implements PropertyChangeListener {
         } catch (NumberFormatException ex) {
             Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if ((this.client != null) && (this.client.isRunning())) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("Connected to server!");
-            alert.showAndWait();
-            this.setRunning();
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Could not connect to server!");
-            alert.showAndWait();
-            this.stopClient();
-        }
     }
 
     public synchronized void stopClient() {
@@ -161,10 +150,31 @@ public class AppClient extends Application implements PropertyChangeListener {
         switch (evt.getPropertyName()) {
             case "isClientRunning": {
                 boolean isRunning = (boolean) evt.getNewValue();
+                System.out.println("Received pce \"isClientRunning\": " + isRunning);
                 if (isRunning) {
                     this.setRunning();
+                    // show alert in FX UI:
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Update UI here:
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setContentText("Connected to server!");
+                            alert.showAndWait();
+                        }
+                    });
                 } else {
                     this.setNotRunning();
+                    // show alert in FX UI:
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Update UI here:
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setContentText("Disconnected from server!");
+                            alert.showAndWait();
+                        }
+                    });
                 }
             }
             break;

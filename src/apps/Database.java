@@ -81,15 +81,16 @@ public class Database {
                     String string1
                             = "CREATE TABLE GamesPlayers ("
                             + " BoardId INTEGER NOT NULL,"
+                            + " Position INTEGER NOT NULL,"
                             + " Username CHAR(30) NOT NULL,"
-                            + " PRIMARY KEY (BoardId, Username),"
+                            + " PRIMARY KEY (BoardId, Position),"
                             + " FOREIGN KEY (BoardId) REFERENCES Games(BoardId),"
                             + " FOREIGN KEY (Username) REFERENCES Users(Username));";
                     PreparedStatement statement1 = conn.prepareStatement(string1);
                     statement1.execute();
                     String string2
                             = "CREATE UNIQUE INDEX GamesPlayers"
-                            + " ON GamesPlayers (BoardId, Username);";
+                            + " ON GamesPlayers (BoardId, Position);";
                     PreparedStatement statement2 = conn.prepareStatement(string2);
                     statement2.execute();
                 } catch (SQLException ex) {
@@ -196,12 +197,13 @@ public class Database {
             {
                 // Record players:
                 String string1
-                        = "INSERT INTO GamesPlayers (BoardId, Username)"
-                        + " VALUES (?, ?)";
+                        = "INSERT INTO GamesPlayers (BoardId, Position, Username)"
+                        + " VALUES (?, ?, ?)";
                 PreparedStatement statement1 = conn.prepareStatement(string1);
                 statement1.setInt(1, board.boardId);
                 for (int i = 0; i < board.boardShape; i++) {
-                    statement1.setString(2, board.usernames[i]);
+                    statement1.setInt(2, i);
+                    statement1.setString(3, board.usernames[i]);
                     statement1.execute();
                 }
             }
@@ -230,4 +232,25 @@ public class Database {
         } finally {
         }
     }
+
+    /*
+    // TEST:
+    public static void main(String[] args) {
+        Database db = new Database(null);
+        String[] usernames = new String[]{"user1", "user2", "user3"};
+        for (String username : usernames) {
+            db.authenticateUser(username, username);
+        }
+        Board_Serverside board = new Board_Serverside(3, 25, usernames, null);
+        board.movesFrom.add(new BoardCoords(4, 5));
+        board.movesTo.add(new BoardCoords(4, 6));
+        board.movesFrom.add(new BoardCoords(4, 6));
+        board.movesTo.add(new BoardCoords(4, 7));
+        board.movesFrom.add(new BoardCoords(4, 7));
+        board.movesTo.add(new BoardCoords(3, 7));
+        board.movesFrom.add(new BoardCoords(1, 2));
+        board.movesTo.add(new BoardCoords(2, 2));
+        db.recordGame(board);
+    }
+    /**/
 }

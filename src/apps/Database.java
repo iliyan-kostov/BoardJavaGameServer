@@ -2,6 +2,7 @@ package apps;
 
 import game.board.Board;
 import game.board.BoardCoords;
+import game.lobby.PlayerStat;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -57,7 +58,9 @@ public class Database {
                             = "CREATE TABLE Games ("
                             + " BoardId INTEGER NOT NULL,"
                             + " BoardShape INTEGER NOT NULL,"
-                            + " PRIMARY KEY (BoardId));";
+                            + " Winner CHAR(30) NOT NULL,"
+                            + " PRIMARY KEY (BoardId),"
+                            + " FOREIGN KEY (Winner) REFERENCES Users(Username));";
                     PreparedStatement statement1 = conn.prepareStatement(string1);
                     statement1.execute();
                     String string2
@@ -75,7 +78,7 @@ public class Database {
                 conn.commit();
             }
             {
-                // Table "Games":
+                // Table "GamesPlayers":
                 try {
                     // Create "GamesPlayers" table if not exists:
                     String string1
@@ -109,10 +112,10 @@ public class Database {
                     String string1 = "CREATE TABLE GamesMoves ("
                             + " BoardId INTEGER NOT NULL,"
                             + " MoveId INTEGER NOT NULL,"
-                            + " FromX INTEGER NOT NULL,"
-                            + " FromY INTEGER NOT NULL,"
-                            + " ToX INTEGER NOT NULL,"
-                            + " ToY INTEGER NOT NULL,"
+                            + " FromRow INTEGER NOT NULL,"
+                            + " FromCol INTEGER NOT NULL,"
+                            + " ToRow INTEGER NOT NULL,"
+                            + " ToCol INTEGER NOT NULL,"
                             + " PRIMARY KEY (BoardId, MoveId),"
                             + " FOREIGN KEY (BoardId) REFERENCES Games(BoardId))";
                     PreparedStatement statement1 = conn.prepareStatement(string1);
@@ -186,12 +189,19 @@ public class Database {
             conn.setAutoCommit(false);
             {
                 // Record game:
+                String winner = null;
+                for (int i = 0; (i < board.usernames.length) && (winner == null); i++) {
+                    if (board.activePlayers[i]) {
+                        winner = board.usernames[i];
+                    }
+                }
                 String string1
-                        = "INSERT INTO Games (BoardId, BoardShape)"
-                        + " VALUES (?, ?)";
+                        = "INSERT INTO Games (BoardId, BoardShape, Winner)"
+                        + " VALUES (?, ?, ?)";
                 PreparedStatement statement1 = conn.prepareStatement(string1);
                 statement1.setInt(1, board.boardId);
                 statement1.setInt(2, board.boardShape);
+                statement1.setString(3, winner);
                 statement1.execute();
             }
             {
@@ -210,7 +220,7 @@ public class Database {
             {
                 // Record moves:
                 String string1
-                        = "INSERT INTO GamesMoves (BoardId, MoveId, FromX, FromY, ToX, ToY)"
+                        = "INSERT INTO GamesMoves (BoardId, MoveId, FromRow, FromCol, ToRow, ToCol)"
                         + " VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement statement1 = conn.prepareStatement(string1);
                 statement1.setInt(1, board.boardId);
@@ -219,10 +229,10 @@ public class Database {
                     statement1.setInt(2, i);
                     from = board.movesFrom.get(i);
                     to = board.movesTo.get(i);
-                    statement1.setInt(3, from.x);
-                    statement1.setInt(4, from.y);
-                    statement1.setInt(5, to.x);
-                    statement1.setInt(6, to.y);
+                    statement1.setInt(3, from.row);
+                    statement1.setInt(4, from.col);
+                    statement1.setInt(5, to.row);
+                    statement1.setInt(6, to.col);
                     statement1.execute();
                 }
             }
@@ -233,6 +243,50 @@ public class Database {
         }
     }
 
+    public synchronized PlayerStat[] getPlayerStats(String[] usernames, int boardShape) {
+        PlayerStat[] result = new PlayerStat[usernames.length];
+        try (Connection conn = DriverManager.getConnection(this.connectionString)) {
+            conn.setAutoCommit(false);
+            for (int i = 0; i < usernames.length; i++) {
+                String playerName = usernames[i];
+                int gamesPlayed = 0;
+                {
+                    String string1
+                            = "SELECT COUNT (BoardId, Position) AS Played"
+                            + " FROM GamesPlayers"
+                            + " WHERE Username = ?;";
+                    PreparedStatement statement1 = conn.prepareStatement(string1);
+                    statement1.setString(1, playerName);
+                    ResultSet resultSet = statement1.executeQuery();
+                    if (resultSet.next()) {
+                        gamesPlayed = resultSet.getInt("Played");
+                    }
+                }
+                int gamesWon = 0;
+                {
+                    String string1
+                            = "SELECT COUNT (BoardId) AS Won"
+                            + " FROM Games"
+                            + " WHERE Winner = ?;";
+                    PreparedStatement statement1 = conn.prepareStatement(string1);
+                    statement1.setString(1, playerName);
+                    ResultSet resultSet = statement1.executeQuery();
+                    if (resultSet.next()) {
+                        gamesWon = resultSet.getInt("Won");
+                    }
+                }
+                int gamesLost = gamesPlayed - gamesWon;
+                int rating = -1;    // TODO
+                int position = -1;  // TODO
+                result[i] = new PlayerStat(playerName, boardShape, gamesWon, gamesLost, rating, position);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+        }
+        return result;
+    }
+
     /*
     // TEST:
     public static void main(String[] args) {
@@ -241,16 +295,33 @@ public class Database {
         for (String username : usernames) {
             db.authenticateUser(username, username);
         }
-        Board_Serverside board = new Board_Serverside(3, 25, usernames, null);
-        board.movesFrom.add(new BoardCoords(4, 5));
-        board.movesTo.add(new BoardCoords(4, 6));
-        board.movesFrom.add(new BoardCoords(4, 6));
-        board.movesTo.add(new BoardCoords(4, 7));
-        board.movesFrom.add(new BoardCoords(4, 7));
-        board.movesTo.add(new BoardCoords(3, 7));
-        board.movesFrom.add(new BoardCoords(1, 2));
-        board.movesTo.add(new BoardCoords(2, 2));
-        db.recordGame(board);
+
+        {
+            Board_Serverside board = new Board_Serverside(3, 25, usernames, null, null);
+            board.movesFrom.add(new BoardCoords(4, 5));
+            board.movesTo.add(new BoardCoords(4, 6));
+            board.movesFrom.add(new BoardCoords(4, 6));
+            board.movesTo.add(new BoardCoords(4, 7));
+            board.movesFrom.add(new BoardCoords(4, 7));
+            board.movesTo.add(new BoardCoords(3, 7));
+            board.movesFrom.add(new BoardCoords(1, 2));
+            board.movesTo.add(new BoardCoords(2, 2));
+            db.recordGame(board);
+        }
+
+        {
+            PlayerStat[] stats = new Database(null).getPlayerStats(usernames, 3);
+            for (int i = 0; i < stats.length; i++) {
+                PlayerStat current = stats[i];
+                System.out.println(
+                        current.playerName + " // "
+                        + current.boardShape + " // "
+                        + current.gamesWon + " // "
+                        + current.gamesLost + " // "
+                        + current.rating + " // "
+                        + current.position);
+            }
+        }
     }
     /**/
 }

@@ -22,7 +22,7 @@ public class NetServer implements IMessageSender, IMessageHandler {
     public final static String EVENT_USER_LOGOUT = "userLogout";
 
     private final PropertyChangeSupport pcs;
-    private final Database database;
+    public final Database database;
     private final GameManager gameManager;
 
     private int port;

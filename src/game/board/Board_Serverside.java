@@ -1,6 +1,7 @@
 package game.board;
 
 import apps.GameManager;
+import apps.NetServer;
 import protocol.Message;
 import protocol.Message_Board_EndGame;
 import protocol.Message_Board_EndTurn;
@@ -18,11 +19,32 @@ import protocol.Message_Board_Surrender;
  */
 public class Board_Serverside extends Board {
 
+    public final NetServer server;
+    public final GameLogic gameLogic;
+
     private final GameManager gameManager;
 
-    public Board_Serverside(int boardShape, int boardId, String[] usernames, GameManager gameManager) {
+    public Board_Serverside(int boardShape, int boardId, String[] usernames, GameManager gameManager, NetServer server) {
         super(boardShape, boardId, usernames);
         this.gameManager = gameManager;
+        this.server = server;
+        switch (this.boardShape) {
+            case 3: {
+                this.gameLogic = new GameLogic_3(this, this.gameManager);
+            }
+            break;
+            case 4: {
+                this.gameLogic = new GameLogic_4(this, this.gameManager);
+            }
+            break;
+            case 6: {
+                this.gameLogic = new GameLogic_6(this, this.gameManager);
+            }
+            break;
+            default: {
+                throw new IllegalArgumentException();
+            }
+        }
     }
 
     @Override

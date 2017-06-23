@@ -1,5 +1,7 @@
 package game.board;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,6 +24,10 @@ import protocol.interfaces.IMessageSender;
  */
 public abstract class Board implements IMessageSender, IMessageHandler {
 
+    public static final int SIZE_3 = 5; // брой редове на триъгълната дъска
+    public static final int SIZE_4 = 5; // брой редове на квадратната дъска
+    public static final int SIZE_6 = 7; // брой редове на шестоъгълната дъска
+
     /**
      * <p>
      * Брой страни на дъската.
@@ -39,7 +45,32 @@ public abstract class Board implements IMessageSender, IMessageHandler {
      * Имена на играчите (login) - по ред на ходовете.
      */
     public final String[] usernames;
+
+    /**
+     * кои играчи са активни (не са победени, напуснали или невключили се в
+     * играта)
+     */
     public final boolean[] activePlayers;
+
+    /**
+     * множества от фигурите ан съответните играчи
+     */
+    public final HashMap<String, HashSet<Figure>> playerFigures;
+
+    /**
+     * фигури, разположени върху дъската - двумерен масив (2 координати x,y)
+     */
+    public final Figure[][] boardFigures;
+
+    /**
+     * брой редове на дъската (масива)
+     */
+    public final int boardSizeRows;
+
+    /**
+     * брой колони на дъската - не всички са запълнени !!!
+     */
+    public final int boardSizeCols;
 
     protected int currentPlayer;
     public LinkedList<BoardCoords> movesFrom;
@@ -59,6 +90,37 @@ public abstract class Board implements IMessageSender, IMessageHandler {
             for (int i = 0; i < boardShape; i++) {
                 this.activePlayers[i] = true;
             }
+            this.playerFigures = new HashMap<>();
+            for (int i = 0; i < boardShape; i++) {
+                this.playerFigures.put(usernames[i], new HashSet<>());
+            }
+            switch (boardShape) {
+                case 3: {
+                    this.boardSizeRows = Board.SIZE_3;
+                    this.boardSizeCols = Board.SIZE_3 * 2 - 1;
+                }
+                break;
+                case 4: {
+                    this.boardSizeRows = Board.SIZE_4;
+                    this.boardSizeCols = Board.SIZE_4;
+                }
+                break;
+                case 6: {
+                    this.boardSizeRows = Board.SIZE_6;
+                    this.boardSizeCols = Board.SIZE_6;
+                }
+                break;
+                default: {
+                    throw new IllegalArgumentException();
+                }
+            }
+            this.boardFigures = new Figure[this.boardSizeRows][];
+            for (int i = 0; i < this.boardSizeRows; i++) {
+                this.boardFigures[i] = new Figure[this.boardSizeCols];
+                for (int j = 0; j < this.boardSizeCols; j++) {
+                    this.boardFigures[i][j] = null;
+                }
+            }
             this.currentPlayer = 0;
             this.movesFrom = new LinkedList<>();
             this.movesTo = new LinkedList<>();
@@ -68,19 +130,19 @@ public abstract class Board implements IMessageSender, IMessageHandler {
     @Override
     public synchronized final void handleMessage(Message message) {
         switch (message.messageType) {
-            case BOARD_GAMESYNC: {
+            case BOARD_GAMESTARTED: {
                 try {
-                    Message_Board_GameSync msg = (Message_Board_GameSync) message;
-                    this.handleGameSync(msg);
+                    Message_Board_GameStarted msg = (Message_Board_GameStarted) message;
+                    this.handleGameStarted(msg);
                 } catch (ClassCastException ex) {
                     Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             break;
-            case BOARD_GAMESTARTED: {
+            case BOARD_GAMESYNC: {
                 try {
-                    Message_Board_GameStarted msg = (Message_Board_GameStarted) message;
-                    this.handleGameStarted(msg);
+                    Message_Board_GameSync msg = (Message_Board_GameSync) message;
+                    this.handleGameSync(msg);
                 } catch (ClassCastException ex) {
                     Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
                 }

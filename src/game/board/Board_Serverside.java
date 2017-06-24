@@ -88,7 +88,6 @@ public class Board_Serverside extends Board {
 
     @Override
     public synchronized void handleSurrender(Message_Board_Surrender message) {
-        // TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.gameLogic.surrender(message);
     }
 }

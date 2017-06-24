@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import protocol.Message_Board_EndTurn;
 import protocol.Message_Board_MoveFigures;
+import protocol.Message_Board_Surrender;
 
 public abstract class GameLogic {
 
@@ -120,6 +121,35 @@ public abstract class GameLogic {
                     // изпращане на съобщението за край на ред до всички играчи в играта:
                     for (int i = 0; i < this.board.usernames.length; i++) {
                         this.board.sendMessage(new Message_Board_EndTurn(this.board.usernames[i], this.board.boardId, usnMessage, this.board.usernames[this.board.currentPlayer]));
+                    }
+                }
+            }
+        }
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public synchronized void surrender(Message_Board_Surrender message) {
+        if (!(this.isGameFinished())) {
+            if (message != null) {
+                String usnMessage = message.username;
+                int userIndex = 0;
+                while (!(this.board.usernames[userIndex].equals(usnMessage))) {
+                    userIndex++;
+                }
+                // ако играчът е активен:
+                if (this.board.activePlayers[userIndex] == true) {
+                    this.board.activePlayers[userIndex] = false;
+                    // ако играта е свършила:
+                    if (this.board.gameLogic.isGameFinished()) {
+                        // прекратяване на играта и регистриране на играта в базата данни:
+                        this.gameManager.endGame(board);
+                    } else {
+                        // ако играчът, който се предава, е бил на ход:
+                        if (this.board.currentPlayer == userIndex) {
+                            // прекратяване на текущия ход:
+                            this.board.gameLogic.endTurn(new Message_Board_EndTurn(usnMessage, this.board.boardId, usnMessage, null));
+                        }
                     }
                 }
             }

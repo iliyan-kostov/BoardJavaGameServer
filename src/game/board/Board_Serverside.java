@@ -66,8 +66,7 @@ public class Board_Serverside extends Board {
 
     @Override
     public synchronized void handleMoveFigures(Message_Board_MoveFigures message) {
-        // TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.gameLogic.moveFigures(message);
     }
 
     @Override
@@ -78,8 +77,7 @@ public class Board_Serverside extends Board {
 
     @Override
     public synchronized void handleEndTurn(Message_Board_EndTurn message) {
-        // TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.gameLogic.endTurn(message);
     }
 
     @Override

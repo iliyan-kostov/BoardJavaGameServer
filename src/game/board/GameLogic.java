@@ -3,6 +3,7 @@ package game.board;
 import apps.GameManager;
 import java.util.ArrayList;
 import java.util.Iterator;
+import protocol.Message_Board_EndTurn;
 import protocol.Message_Board_MoveFigures;
 
 public abstract class GameLogic {
@@ -103,6 +104,28 @@ public abstract class GameLogic {
                 }
             }
         }
+    }
+
+    public final synchronized void endTurn(Message_Board_EndTurn message) {
+        if (!(this.isGameFinished())) {
+            if (message != null) {
+                String usnMessage = message.username;
+                String usnCurrent = this.board.usernames[this.board.currentPlayer];
+                // ако играчът, изпратил съобщението, е на ход:
+                if (usnMessage.equals(usnCurrent)) {
+                    // предаване на хода на следващия активен играч:
+                    do {
+                        this.board.currentPlayer = (this.board.currentPlayer + 1) % (this.board.usernames.length);
+                    } while (this.board.activePlayers[this.board.currentPlayer] == false);
+                    // изпращане на съобщението за край на ред до всички играчи в играта:
+                    for (int i = 0; i < this.board.usernames.length; i++) {
+                        this.board.sendMessage(new Message_Board_EndTurn(this.board.usernames[i], this.board.boardId, usnMessage, this.board.usernames[this.board.currentPlayer]));
+                    }
+                }
+            }
+        }
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public final synchronized boolean isGameFinished() {

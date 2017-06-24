@@ -117,7 +117,9 @@ public class NetServer implements IMessageSender, IMessageHandler {
             }
         }
         this.serverSocket = null;
-        // close the accepting thread:
+        /*
+        // close the accepting thread: DEADLOCK !!!
+        // the accepting thread will close itself
         while ((this.acceptingThread != null) && (this.acceptingThread.isAlive())) {
             this.acceptingThread.interrupt();
             try {
@@ -127,15 +129,20 @@ public class NetServer implements IMessageSender, IMessageHandler {
                 Logger.getLogger(NetServer.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
+        /**/
         this.acceptingThread = null;
         // close all active connections to clients:
-        for (Map.Entry<Integer, NetServersideConnection> entry : connectionsById.entrySet()) {
+        while (!(this.connectionsById.isEmpty())) {
+            // not entryset iteration to avoid concurrency issues:
+            Map.Entry<Integer, NetServersideConnection> entry = this.connectionsById.entrySet().iterator().next();
             if ((entry != null) && (entry.getValue() != null)) {
                 NetServersideConnection connection = entry.getValue();
                 this.stopConnection(connection);
             }
         }
-        for (Map.Entry<String, NetServersideConnection> entry : connectionsByUsername.entrySet()) {
+        while (!(this.connectionsByUsername.isEmpty())) {
+            // not entryset iteration to avoid concurrency issues:
+            Map.Entry<String, NetServersideConnection> entry = this.connectionsByUsername.entrySet().iterator().next();
             if ((entry != null) && (entry.getValue() != null)) {
                 NetServersideConnection connection = entry.getValue();
                 this.stopConnection(connection);

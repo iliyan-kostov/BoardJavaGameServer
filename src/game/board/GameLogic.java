@@ -125,14 +125,16 @@ public abstract class GameLogic {
                 }
             }
         }
-        // TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public synchronized void surrender(Message_Board_Surrender message) {
         if (!(this.isGameFinished())) {
             if (message != null) {
                 String usnMessage = message.username;
+                message.playerSurrenders = usnMessage;
+                for (int i = 0; i < this.board.usernames.length; i++) {
+                    this.gameManager.sendMessage(new Message_Board_Surrender(this.board.usernames[i], this.board.boardId, usnMessage));
+                }
                 int userIndex = 0;
                 while (!(this.board.usernames[userIndex].equals(usnMessage))) {
                     userIndex++;

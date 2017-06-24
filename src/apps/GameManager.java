@@ -126,7 +126,9 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
             case NetServer.EVENT_USER_LOGOUT: {
                 String playerSurrenders = (String) evt.getNewValue();
                 Board_Serverside board = this.boardsByUsername.get(playerSurrenders);
-                board.handleSurrender(new Message_Board_Surrender(playerSurrenders, board.boardId, playerSurrenders));
+                if (board != null) {
+                    board.handleSurrender(new Message_Board_Surrender(playerSurrenders, board.boardId, playerSurrenders));
+                }
             }
             break;
             default: {

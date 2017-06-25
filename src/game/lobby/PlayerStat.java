@@ -1,5 +1,7 @@
 package game.lobby;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * Игрални статистики за потребител за определен режим на игра:
@@ -14,7 +16,7 @@ package game.lobby;
  *
  * @author iliyan-kostov <https://github.com/iliyan-kostov/>
  */
-public class PlayerStat {
+public class PlayerStat implements Serializable {
 
     public final String playerName;
     public final int boardShape;

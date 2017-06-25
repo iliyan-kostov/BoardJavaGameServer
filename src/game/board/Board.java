@@ -121,9 +121,182 @@ public abstract class Board implements IMessageSender, IMessageHandler {
                     this.boardFigures[i][j] = null;
                 }
             }
+            // поставяне на начални фигури на дъската:
+            this.initFigures();
+            // задаване на начално състояние на играта:
             this.currentPlayer = 0;
             this.movesFrom = new LinkedList<>();
             this.movesTo = new LinkedList<>();
+        }
+    }
+
+    /**
+     * Поставя начални фигури на дъската.
+     */
+    private void initFigures() {
+        switch (this.boardShape) {
+            case 3: {
+                // player 0:
+                {
+                    int playerId = 0;
+                    String playerName = this.usernames[playerId];
+                    for (int i = 1; i < this.boardSizeRows - 1; i++) {
+                        int row = i;
+                        int col = 0;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 1:
+                {
+                    int playerId = 1;
+                    String playerName = this.usernames[playerId];
+                    for (int j = 1; j < this.boardSizeRows - 1; j++) {
+                        int row = this.boardSizeRows - 1;
+                        int col = 2 * j;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 2:
+                {
+                    int playerId = 2;
+                    String playerName = this.usernames[playerId];
+                    for (int i = 1; i < this.boardSizeRows - 1; i++) {
+                        int row = i;
+                        int col = 2 * i;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+            }
+            break;
+            case 4: {
+                // player 0:
+                {
+                    int playerId = 0;
+                    String playerName = this.usernames[playerId];
+                    for (int i = 1; i < this.boardSizeRows - 1; i++) {
+                        int row = i;
+                        int col = 0;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 1:
+                {
+                    int playerId = 1;
+                    String playerName = this.usernames[playerId];
+                    for (int j = 1; j < this.boardSizeCols - 1; j++) {
+                        int row = this.boardSizeRows - 1;
+                        int col = j;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 2:
+                {
+                    int playerId = 2;
+                    String playerName = this.usernames[playerId];
+                    for (int i = 1; i < this.boardSizeRows - 1; i++) {
+                        int row = i;
+                        int col = this.boardSizeCols - 1;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 3:
+                {
+                    int playerId = 3;
+                    String playerName = this.usernames[playerId];
+                    for (int j = 1; j < this.boardSizeCols - 1; j++) {
+                        int row = 0;
+                        int col = j;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+            }
+            break;
+            case 6: {
+                // player 0:
+                {
+                    int playerId = 0;
+                    int sideLength = (this.boardSizeRows + 1) / 2;
+                    String playerName = this.usernames[playerId];
+                    for (int i = 1; i < sideLength - 1; i++) {
+                        int row = i;
+                        int col = 0;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 1:
+                {
+                    int playerId = 1;
+                    int sideLength = (this.boardSizeRows + 1) / 2;
+                    String playerName = this.usernames[playerId];
+                    for (int i = sideLength; i < this.boardSizeRows - 1; i++) {
+                        int row = i;
+                        int col = 0;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 2:
+                {
+                    int playerId = 2;
+                    int sideLength = (this.boardSizeRows + 1) / 2;
+                    String playerName = this.usernames[playerId];
+                    for (int j = 1; j < sideLength - 1; j++) {
+                        int row = this.boardSizeRows - 1;
+                        int col = j;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 3:
+                {
+                    int playerId = 3;
+                    int sideLength = (this.boardSizeRows + 1) / 2;
+                    int coef = (sideLength - 1) * 3;
+                    String playerName = this.usernames[playerId];
+                    for (int i = sideLength; i < this.boardSizeRows - 1; i++) {
+                        int row = i;
+                        int col = coef - i;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 4:
+                {
+                    int playerId = 4;
+                    int sideLength = (this.boardSizeRows + 1) / 2;
+                    String playerName = this.usernames[playerId];
+                    for (int i = 1; i < sideLength - 1; i++) {
+                        int row = i;
+                        int col = i + sideLength - 1;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+                // player 5:
+                {
+                    int playerId = 5;
+                    int sideLength = (this.boardSizeRows + 1) / 2;
+                    String playerName = this.usernames[playerId];
+                    for (int j = 1; j < sideLength - 1; j++) {
+                        int row = 0;
+                        int col = j;
+                        this.boardFigures[row][col] = new Figure(new BoardCoords(row, col), playerName);
+                        this.playerFigures.get(playerName).add(this.boardFigures[row][col]);
+                    }
+                }
+            }
+            break;
+            default: {
+                throw new IllegalArgumentException();
+            }
         }
     }
 

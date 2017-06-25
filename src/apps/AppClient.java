@@ -63,6 +63,11 @@ public class AppClient extends Application implements PropertyChangeListener {
         this.lblStatus2 = new Circle(5);
         this.gridPaneLogin = new GridPane();
         this.scrollPaneBoard = new ScrollPane();
+        
+        this.tfHostname.setText("localhost");
+        this.tfPort.setText("500");
+        this.tfUsername.setText("user");
+        this.tfPassword.setText("pass");
 
         this.root = new GridPane();
 

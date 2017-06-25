@@ -120,6 +120,10 @@ public abstract class GameLogic {
                         // прекратяване на играта и регистриране на играта в базата данни:
                         this.gameManager.endGame(board);
                     }
+                    {
+                        // ТЕСТ - автоматично прекратяване на хода на играча след едно преместване:
+                        this.board.currentPlayer = (this.board.currentPlayer + 1) % this.board.usernames.length;
+                    }
                 }
             }
         }

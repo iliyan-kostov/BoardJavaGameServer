@@ -1,9 +1,11 @@
 package game.board;
 
 import apps.NetClient;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import protocol.Message;
 import protocol.Message_Board_EndGame;
@@ -21,6 +23,8 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
     public final NetClient client;
     public final Group boardView;
     public final Board_Clientside_Cell[][] boardCells;
+    public BoardCoords from;
+    public BoardCoords to;
 
     public Board_Clientside(int boardShape, int boardId, String[] usernames, NetClient client) {
         super(boardShape, boardId, usernames);
@@ -32,6 +36,8 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
                 this.boardCells[i][j] = new Board_Clientside_Cell(i, j, this);
             }
         }
+        this.from = null;
+        this.to = null;
         // поставяне на клетките от дъската по местата им:
         switch (boardShape) {
             case 3: {
@@ -125,11 +131,32 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
 
     @Override
     public synchronized void handleMoveFigures(Message_Board_MoveFigures message) {
-        // TODO
-        System.out.println("[Client] Received Message_Board_MoveFigures !!! IMPLEMENT THE METHOD !!!");
-        System.out.flush();
-        // =======================================================================================
-        // =======================================================================================
+        if (message != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    ArrayList<BoardCoords> from = message.from;
+                    ArrayList<BoardCoords> to = message.to;
+                    if ((from != null) && (to != null)) {
+                        Iterator<BoardCoords> itFrom = from.iterator();
+                        Iterator<BoardCoords> itTo = to.iterator();
+                        while (itFrom.hasNext() && itTo.hasNext()) {
+                            BoardCoords c1 = itFrom.next();
+                            BoardCoords c2 = itTo.next();
+                            String playerMoves = boardFigures[c1.row][c1.col].username;
+                            int playerId = 0;
+                            while (!(usernames[playerId].equals(playerMoves))) {
+                                playerId++;
+                            }
+                            boardCells[c1.row][c1.col].setFill(Board_Clientside_Cell.COLOR_BOARD);
+                            boardCells[c2.row][c2.col].setFill(Board_Clientside_Cell.COLOR_PLAYERS[playerId]);
+                            boardFigures[c2.row][c2.col] = boardFigures[c1.row][c1.col];
+                            boardFigures[c1.row][c1.col] = null;
+                        }
+                    }
+                }
+            });
+        }
     }
 
     @Override

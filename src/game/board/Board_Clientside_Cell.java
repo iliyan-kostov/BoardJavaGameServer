@@ -1,11 +1,12 @@
 package game.board;
 
+import java.util.ArrayList;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
-import javax.swing.JOptionPane;
+import protocol.Message_Board_MoveFigures;
 
 public class Board_Clientside_Cell extends Polygon {
 
@@ -66,7 +67,21 @@ public class Board_Clientside_Cell extends Polygon {
         this.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                JOptionPane.showMessageDialog(null, "row: " + rowId + ", col: " + colId);
+                if (board.from == null) {
+                    if (board.boardFigures[rowId][colId] != null) {
+                        board.from = new BoardCoords(rowId, colId);
+                    }
+                } else {
+                    board.to = new BoardCoords(rowId, colId);
+                    ArrayList<BoardCoords> from = new ArrayList<>();
+                    ArrayList<BoardCoords> to = new ArrayList<>();
+                    from.add(board.from);
+                    to.add(board.to);
+                    board.sendMessage(new Message_Board_MoveFigures(null, board.boardId, from, to));
+                    board.from = null;
+                    board.to = null;
+                }
+                //JOptionPane.showMessageDialog(null, "row: " + rowId + ", col: " + colId);
             }
         });
     }

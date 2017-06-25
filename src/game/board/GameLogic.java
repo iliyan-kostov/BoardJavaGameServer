@@ -47,61 +47,79 @@ public abstract class GameLogic {
     public final synchronized void moveFigures(Message_Board_MoveFigures message) {
         if (!(this.isGameFinished())) {
             if (message != null) {
-                ArrayList<BoardCoords> acceptedFrom = new ArrayList<>();
-                ArrayList<BoardCoords> acceptedTo = new ArrayList<>();
-                Iterator<BoardCoords> itFrom = message.from.iterator();
-                Iterator<BoardCoords> itTo = message.to.iterator();
-                // докато има още заявки за местене в съобщението и играта не е завършила:
-                while (itFrom.hasNext() && itTo.hasNext() && !(this.isGameFinished())) {
-                    // взема се следващата двойка координати (от, до):
-                    BoardCoords from = itFrom.next();
-                    BoardCoords to = itTo.next();
-                    // ако координатите сочат полета в рамките на дъската, които са съседни:
-                    if (this.isInsideBoard(from) && this.isInsideBoard(to) && this.isNextTo(from, to)) {
-                        Figure figureFrom = this.board.boardFigures[from.row][from.col];
-                        Figure figureTo = this.board.boardFigures[to.row][to.col];
-                        // ако на съответните полета има фигури:
-                        if (figureFrom != null && figureTo != null) {
-                            // ако фигурата на началното поле принадлежи на изпратилия съобщението играч и той е на ход:
-                            String usnMessage = message.username;
-                            String usnFigureFrom = figureFrom.username;
-                            String usnCurrent = this.board.usernames[this.board.currentPlayer];
-                            if ((usnMessage.equals(usnCurrent)) && (usnMessage.equals(usnFigureFrom))) {
-                                // ако фигурите са на различни играчи:
-                                if (!((figureFrom.username).equals(figureTo.username))) {
-                                    // регистрира се преместването в историята на играта (дъската):
-                                    this.board.movesFrom.add(from);
-                                    this.board.movesTo.add(to);
-                                    // преместването се регистрира в съобщението за отговор към играчите:
-                                    acceptedFrom.add(from);
-                                    acceptedTo.add(to);
-                                    // премахва се от игра фигурата на крайното поле:
-                                    this.board.playerFigures.get(figureTo.username).remove(figureTo);
-                                    // проверява се дали играчът, загубил фигура, има останали фигури:
-                                    if (this.board.playerFigures.get(figureTo.username).isEmpty()) {
-                                        int id = 0;
-                                        while (!(this.board.usernames[id].equals(figureTo.username))) {
-                                            id++;
+                String usnMessage = message.username;
+                String usnCurrent = this.board.usernames[this.board.currentPlayer];
+                // ако авторът на съобщението е на ход:
+                if (usnMessage.equals(usnCurrent)) {
+                    ArrayList<BoardCoords> acceptedFrom = new ArrayList<>();
+                    ArrayList<BoardCoords> acceptedTo = new ArrayList<>();
+                    Iterator<BoardCoords> itFrom = message.from.iterator();
+                    Iterator<BoardCoords> itTo = message.to.iterator();
+                    // докато има още заявки за местене в съобщението и играта не е завършила:
+                    while (itFrom.hasNext() && itTo.hasNext() && !(this.isGameFinished())) {
+                        // взема се следващата двойка координати (от, до):
+                        BoardCoords from = itFrom.next();
+                        BoardCoords to = itTo.next();
+                        // ако координатите сочат полета в рамките на дъската, които са съседни:
+                        if (this.isInsideBoard(from) && this.isInsideBoard(to) && this.isNextTo(from, to)) {
+                            Figure figureFrom = this.board.boardFigures[from.row][from.col];
+                            Figure figureTo = this.board.boardFigures[to.row][to.col];
+                            // ако на началното поле има фигура:
+                            if (figureFrom != null) {
+                                // ако фигурата на началното поле принадлежи на изпратилия съобщението играч:
+                                String usnFigureFrom = figureFrom.username;
+                                if (usnMessage.equals(usnFigureFrom)) {
+                                    if (figureTo != null) {
+                                        // ако на крайното поле има фигура:
+                                        // ако фигурите са на различни играчи:
+                                        if (!((figureFrom.username).equals(figureTo.username))) {
+                                            // регистрира се преместването в историята на играта (дъската):
+                                            this.board.movesFrom.add(from);
+                                            this.board.movesTo.add(to);
+                                            // преместването се регистрира в съобщението за отговор към играчите:
+                                            acceptedFrom.add(from);
+                                            acceptedTo.add(to);
+                                            // премахва се от игра фигурата на крайното поле:
+                                            this.board.playerFigures.get(figureTo.username).remove(figureTo);
+                                            // проверява се дали играчът, загубил фигура, има останали фигури:
+                                            if (this.board.playerFigures.get(figureTo.username).isEmpty()) {
+                                                int id = 0;
+                                                while (!(this.board.usernames[id].equals(figureTo.username))) {
+                                                    id++;
+                                                }
+                                                this.board.activePlayers[id] = false;
+                                            }
+                                            // фигурата от началното поле се премества в крайното:
+                                            this.board.boardFigures[to.row][to.col] = figureFrom;
+                                            figureFrom.boardCoords = to;
+                                            this.board.boardFigures[from.row][from.col] = null;
                                         }
-                                        this.board.activePlayers[id] = false;
+                                    } else {
+                                        // ако крайното поле е свободно:
+                                        // регистрира се преместването в историята на играта (дъската):
+                                        this.board.movesFrom.add(from);
+                                        this.board.movesTo.add(to);
+                                        // преместването се регистрира в съобщението за отговор към играчите:
+                                        acceptedFrom.add(from);
+                                        acceptedTo.add(to);
+                                        // фигурата от началното поле се премества в крайното:
+                                        this.board.boardFigures[to.row][to.col] = figureFrom;
+                                        figureFrom.boardCoords = to;
+                                        this.board.boardFigures[from.row][from.col] = null;
                                     }
-                                    // фигурата от началното поле се премества в крайното:
-                                    this.board.boardFigures[to.row][to.col] = figureFrom;
-                                    figureFrom.boardCoords = to;
-                                    this.board.boardFigures[from.row][from.col] = null;
                                 }
                             }
                         }
                     }
-                }
-                // разпращане на съобщението с изпълнените ходове към всички играчи:
-                for (int i = 0; i < this.board.usernames.length; i++) {
-                    this.board.sendMessage(new Message_Board_MoveFigures(this.board.usernames[i], this.board.boardId, acceptedFrom, acceptedTo));
-                }
-                // ако играта е приключила:
-                if (this.isGameFinished()) {
-                    // прекратяване на играта и регистриране на играта в базата данни:
-                    this.gameManager.endGame(board);
+                    // разпращане на съобщението с изпълнените ходове към всички играчи:
+                    for (int i = 0; i < this.board.usernames.length; i++) {
+                        this.board.sendMessage(new Message_Board_MoveFigures(this.board.usernames[i], this.board.boardId, acceptedFrom, acceptedTo));
+                    }
+                    // ако играта е приключила:
+                    if (this.isGameFinished()) {
+                        // прекратяване на играта и регистриране на играта в базата данни:
+                        this.gameManager.endGame(board);
+                    }
                 }
             }
         }

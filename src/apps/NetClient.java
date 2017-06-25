@@ -87,7 +87,23 @@ public class NetClient implements IMessageSender, IMessageHandler, PropertyChang
             case BOARD_GAMESTARTED: {
                 try {
                     Message_Board_GameStarted msg = (Message_Board_GameStarted) message;
-                    this.board = new Board_Clientside(msg.boardShape, msg.boardId, msg.playerNames, this);
+                    switch (msg.boardShape) {
+                        case 3: {
+                            this.board = new Board_Clientside(msg.boardShape, msg.boardId, msg.playerNames, this);
+                        }
+                        break;
+                        case 4: {
+                            this.board = new Board_Clientside(msg.boardShape, msg.boardId, msg.playerNames, this);
+                        }
+                        break;
+                        case 6: {
+                            this.board = new Board_Clientside(msg.boardShape, msg.boardId, msg.playerNames, this);
+                        }
+                        break;
+                        default: {
+                            throw new IllegalArgumentException();
+                        }
+                    }
                     this.board.handleMessage(message);
                     this.pcs.firePropertyChange(NetClient.EVENT_GAME_STARTED, false, true);
                 } catch (ClassCastException ex) {

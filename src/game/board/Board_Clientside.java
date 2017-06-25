@@ -1,8 +1,10 @@
 package game.board;
 
 import apps.NetClient;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
 import protocol.Message;
 import protocol.Message_Board_EndGame;
 import protocol.Message_Board_EndTurn;
@@ -18,21 +20,92 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
 
     public final NetClient client;
     public final Group boardView;
+    public final Board_Clientside_Cell[][] boardCells;
 
     public Board_Clientside(int boardShape, int boardId, String[] usernames, NetClient client) {
         super(boardShape, boardId, usernames);
         this.client = client;
         this.boardView = new Group();
+        this.boardCells = new Board_Clientside_Cell[this.boardSizeRows][this.boardSizeCols];
+        for (int i = 0; i < this.boardSizeRows; i++) {
+            for (int j = 0; j < this.boardSizeCols; j++) {
+                this.boardCells[i][j] = new Board_Clientside_Cell(i, j, this);
+            }
+        }
+        // поставяне на клетките от дъската по местата им:
         switch (boardShape) {
             case 3: {
+                for (int i = 0; i < this.boardSizeRows; i++) {
+                    for (int j = 0; j < this.boardSizeCols; j++) {
+                        // ако полето е от дъската:
+                        if (j <= 2 * i) {
+                            this.boardView.getChildren().add(this.boardCells[i][j]);
+                            this.boardCells[i][j].setRotate((j % 2) * 180.);
+                            this.boardCells[i][j].setTranslateX((j - i) * Board_Clientside_Cell.SIDE_3 * 0.500);
+                            this.boardCells[i][j].setTranslateY(i * Board_Clientside_Cell.SIDE_3 * 0.866);
+                        }
+                    }
+                }
             }
             break;
             case 4: {
+                for (int i = 0; i < this.boardSizeRows; i++) {
+                    for (int j = 0; j < this.boardSizeCols; j++) {
+                        this.boardView.getChildren().add(this.boardCells[i][j]);
+                        //this.boardCells[i][j].setRotate(0.);
+                        this.boardCells[i][j].setTranslateX(j * Board_Clientside_Cell.SIDE_4);
+                        this.boardCells[i][j].setTranslateY(i * Board_Clientside_Cell.SIDE_4);
+                    }
+                }
             }
             break;
             case 6: {
+                int rowLength = (this.boardSizeCols + 1) / 2;
+                int dx = 0;
+                int midRowId = (this.boardSizeRows - 1) / 2;
+                // горна половина:
+                for (int i = 0; i < midRowId + 1; i++, rowLength++, dx--) {
+                    for (int j = 0; j < rowLength; j++) {
+                        this.boardView.getChildren().add(this.boardCells[i][j]);
+                        //this.boardCells[i][j].setRotate(0.);
+                        this.boardCells[i][j].setTranslateX((2 * j + dx) * Board_Clientside_Cell.SIDE_6 * 0.866);
+                        this.boardCells[i][j].setTranslateY(i * Board_Clientside_Cell.SIDE_6 * 1.500);
+                    }
+                }
+                rowLength = rowLength - 2;
+                dx = dx + 2;
+                // долна половина:
+                {
+                    for (int i = midRowId + 1; i < this.boardSizeCols; i++, rowLength--, dx++) {
+                        for (int j = 0; j < rowLength; j++) {
+                            this.boardView.getChildren().add(this.boardCells[i][j]);
+                            //this.boardCells[i][j].setRotate(0.);
+                            this.boardCells[i][j].setTranslateX((2 * j + dx) * Board_Clientside_Cell.SIDE_6 * 0.866);
+                            this.boardCells[i][j].setTranslateY(i * Board_Clientside_Cell.SIDE_6 * 1.500);
+                        }
+                    }
+                }
             }
             break;
+            default: {
+                throw new IllegalArgumentException();
+            }
+        }
+        // отразяване на позициите на фигурите по дъската:
+        for (Map.Entry<String, HashSet<Figure>> entry : this.playerFigures.entrySet()) {
+            String playerName = entry.getKey();
+            int playerId = 0;
+            while (!(this.usernames[playerId].equals(playerName))) {
+                playerId++;
+            }
+            HashSet<Figure> figures = entry.getValue();
+            if (figures != null) {
+                Iterator<Figure> it = figures.iterator();
+                while (it.hasNext()) {
+                    Figure f = it.next();
+                    this.boardCells[f.boardCoords.row][f.boardCoords.col].setFill(Board_Clientside_Cell.COLOR_PLAYERS[playerId]);
+                }
+            }
         }
     }
 
@@ -42,13 +115,7 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
 
     @Override
     public synchronized void handleGameStarted(Message_Board_GameStarted message) {
-        // TODO
-        this.boardView.getChildren().clear();
-        this.boardView.getChildren().add(new Label("INSERT BOARD VIEW HERE !!!"));
-        System.out.println("[Client] Received Message_Board_GameStarted !!! IMPLEMENT THE METHOD !!!");
-        System.out.flush();
-        // =======================================================================================
-        // =======================================================================================
+        // boardView is generated in constructor !!!
     }
 
     @Override

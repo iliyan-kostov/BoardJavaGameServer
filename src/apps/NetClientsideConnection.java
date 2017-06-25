@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import protocol.Message;
 import protocol.Message_Auth_Login;
+import protocol.Message_Lobby_NewGameRequest;
 import protocol.interfaces.IMessageHandler;
 import protocol.interfaces.IMessageSender;
 
@@ -55,6 +56,10 @@ public class NetClientsideConnection extends Thread implements IMessageSender, I
             this.pcs.firePropertyChange(NetClientsideConnection.EVENT_IS_CLIENT_RUNNING, false, true);
             // authenticate:
             this.sendMessage(new Message_Auth_Login(this.username, this.password));
+            {
+                // ТЕСТ - автоматично заявяване на искане за игра - 4 души:
+                this.sendMessage(new Message_Lobby_NewGameRequest(this.username, 4, 0));
+            }
             // loop:
             boolean keepRunning = true;
             while (keepRunning && (this.inputStream != null) && (!(this.socket.isClosed()))) {

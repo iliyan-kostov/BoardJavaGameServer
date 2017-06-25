@@ -16,6 +16,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -40,6 +41,9 @@ public class AppClient extends Application implements PropertyChangeListener {
     private final Button btnConnect;
     private final Button btnDisconnect;
 
+    private final GridPane gridPaneLogin;
+    private final ScrollPane scrollPaneBoard;
+
     private final GridPane root;
 
     public AppClient() {
@@ -57,6 +61,8 @@ public class AppClient extends Application implements PropertyChangeListener {
         this.tfUsername = new TextField();
         this.tfPassword = new TextField();
         this.lblStatus2 = new Circle(5);
+        this.gridPaneLogin = new GridPane();
+        this.scrollPaneBoard = new ScrollPane();
 
         this.root = new GridPane();
 
@@ -124,6 +130,10 @@ public class AppClient extends Application implements PropertyChangeListener {
         this.root.getChildren().clear();
         this.root.setAlignment(Pos.CENTER);
         this.root.setPadding(new Insets(25));
+
+        this.gridPaneLogin.getChildren().clear();
+        this.gridPaneLogin.setAlignment(Pos.CENTER);
+        this.gridPaneLogin.setPadding(new Insets(25));
         Node[] nodes = {
             this.lblStatus, this.lblStatus2,
             this.lblHostname, this.tfHostname,
@@ -132,8 +142,13 @@ public class AppClient extends Application implements PropertyChangeListener {
             this.lblPassword, this.tfPassword,
             this.btnConnect, this.btnDisconnect};
         for (int i = 0; i < nodes.length; i++) {
-            this.root.add(nodes[i], i % 2, i / 2);
+            this.gridPaneLogin.add(nodes[i], i % 2, i / 2);
         }
+        this.root.add(gridPaneLogin, 0, 0);
+
+        this.scrollPaneBoard.setContent(new Label("Board"));
+        this.root.add(scrollPaneBoard, 1, 0);
+
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(event -> {
@@ -175,6 +190,15 @@ public class AppClient extends Application implements PropertyChangeListener {
                         }
                     });
                 }
+            }
+            break;
+            case NetClient.EVENT_GAME_STARTED: {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollPaneBoard.setContent(client.getBoardView());
+                    }
+                });
             }
             break;
             default: {

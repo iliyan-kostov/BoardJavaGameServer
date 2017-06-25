@@ -30,13 +30,6 @@ public class NetServerAcceptingThread extends Thread {
         }
         if (this.server.serverSocket != null) {
             // stop the server in case of exception in the accepting thread:
-            while ((this.serverSocket != null) && (!(this.serverSocket.isClosed()))) {
-                try {
-                    this.serverSocket.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(NetServerAcceptingThread.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
             this.server.stop();
         }
     }

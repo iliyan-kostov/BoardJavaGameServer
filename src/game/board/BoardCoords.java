@@ -8,11 +8,11 @@ package game.board;
  */
 public final class BoardCoords {
 
-    public final int x;
-    public final int y;
+    public final int row;
+    public final int col;
 
-    public BoardCoords(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public BoardCoords(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 }

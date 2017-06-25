@@ -1,7 +1,7 @@
 package apps;
 
-import game.board.Board;
 import game.board.Board_Serverside;
+import game.lobby.PlayerStat;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
@@ -10,7 +10,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import protocol.Message;
 import protocol.Message_Board;
+import protocol.Message_Board_EndGame;
 import protocol.Message_Board_GameStarted;
+import protocol.Message_Board_Surrender;
 import protocol.Message_Lobby_NewGameRequest;
 import protocol.interfaces.IMessageHandler;
 import protocol.interfaces.IMessageSender;
@@ -71,7 +73,7 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
 
     public synchronized void startGame(String[] usernames, int boardShape) {
         // TODO
-        Board_Serverside board = new Board_Serverside(boardShape, nextBoardId, usernames, this);
+        Board_Serverside board = new Board_Serverside(boardShape, nextBoardId, usernames, this, this.server);
         this.boardsById.put(board.boardId, board);
         for (int i = 0; i < usernames.length; i++) {
             this.boardsByUsername.put(usernames[i], board);
@@ -85,12 +87,36 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
         }
     }
 
-    public synchronized void endGame(Board board) {
-        // RECORD GAME IN DATABASE !!!
-
-        this.boardsById.remove(board.boardId);
-        for (int i = 0; i < board.boardShape; i++) {
-            this.boardsByUsername.remove(board.usernames[i]);
+    /**
+     * Ends a game and records it in the database if it's finished according to
+     * the game logic.
+     *
+     * @param board
+     */
+    public synchronized void endGame(Board_Serverside board) {
+        // ако играта все още не е официално прекратена:
+        if (this.boardsById.get(board.boardId) != null) {
+            // вземане на данни за статистиките на играчите - преди края на играта:
+            PlayerStat[] playerStatsOld = board.server.database.getPlayerStats(board.usernames, board.boardShape);
+            // приемане на статистики след играта - еднакви с началните:
+            PlayerStat[] playerStatsNew = playerStatsOld;
+            // ако играта е приключила успешно (според логиката):
+            if (board.gameLogic.isGameFinished()) {
+                // регистриране на играта в базата данни:
+                this.server.database.recordGame(board);
+                // вземане на актуалните данни за статистиките на играчите - след края на играта:
+                playerStatsNew = board.server.database.getPlayerStats(board.usernames, board.boardShape);
+            }
+            // разпращане на съобщението за завършилата игра към всички играчи:
+            for (int i = 0; i < board.usernames.length; i++) {
+                board.sendMessage(new Message_Board_EndGame(board.usernames[i], board.boardId, playerStatsOld, playerStatsNew));
+            }
+            // премахване на играта от списъка:
+            this.boardsById.remove(board.boardId);
+            // премахване на асоциацията на играчите с играта:
+            for (int i = 0; i < board.usernames.length; i++) {
+                this.boardsByUsername.remove(board.usernames[i]);
+            }
         }
     }
 
@@ -98,9 +124,11 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case NetServer.EVENT_USER_LOGOUT: {
-                String username = (String) evt.getNewValue();
-                Board_Serverside board = this.boardsById.get(username);
-                board.userLogout(username);
+                String playerSurrenders = (String) evt.getNewValue();
+                Board_Serverside board = this.boardsByUsername.get(playerSurrenders);
+                if (board != null) {
+                    board.handleSurrender(new Message_Board_Surrender(playerSurrenders, board.boardId, playerSurrenders));
+                }
             }
             break;
             default: {

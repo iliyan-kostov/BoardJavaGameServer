@@ -2,6 +2,7 @@ package game.board;
 
 import apps.GameManager;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import protocol.Message_Board_EndTurn;
 import protocol.Message_Board_MoveFigures;
@@ -55,8 +56,8 @@ public abstract class GameLogic {
                     ArrayList<BoardCoords> acceptedTo = new ArrayList<>();
                     Iterator<BoardCoords> itFrom = message.from.iterator();
                     Iterator<BoardCoords> itTo = message.to.iterator();
-                    // докато има още заявки за местене в съобщението и играта не е завършила:
-                    while (itFrom.hasNext() && itTo.hasNext() && !(this.isGameFinished())) {
+                    // докато има още заявки за местене в съобщението, а също ходът и играта не са завършили:
+                    while (itFrom.hasNext() && itTo.hasNext() && !(this.isTurnFinished()) && !(this.isGameFinished())) {
                         // взема се следващата двойка координати (от, до):
                         BoardCoords from = itFrom.next();
                         BoardCoords to = itTo.next();
@@ -64,11 +65,14 @@ public abstract class GameLogic {
                         if (this.isInsideBoard(from) && this.isInsideBoard(to) && this.isNextTo(from, to)) {
                             Figure figureFrom = this.board.boardFigures[from.row][from.col];
                             Figure figureTo = this.board.boardFigures[to.row][to.col];
-                            // ако на началното поле има фигура:
-                            if (figureFrom != null) {
+                            // ако на началното поле има фигура и тя може да бъде премествана (има оставащи ходове):
+                            if (figureFrom != null && figureFrom.canMove()) {
                                 // ако фигурата на началното поле принадлежи на изпратилия съобщението играч:
                                 String usnFigureFrom = figureFrom.username;
                                 if (usnMessage.equals(usnFigureFrom)) {
+                                    // регистрира извършен с фигурата ход:
+                                    figureFrom.movesMake();
+                                    // определяне на вида и логиката на хода - в зависимост от контекста на дъската:
                                     if (figureTo != null) {
                                         // ако на крайното поле има фигура:
                                         // ако фигурите са на различни играчи:
@@ -83,11 +87,8 @@ public abstract class GameLogic {
                                             this.board.playerFigures.get(figureTo.username).remove(figureTo);
                                             // проверява се дали играчът, загубил фигура, има останали фигури:
                                             if (this.board.playerFigures.get(figureTo.username).isEmpty()) {
-                                                int id = 0;
-                                                while (!(this.board.usernames[id].equals(figureTo.username))) {
-                                                    id++;
-                                                }
-                                                this.board.activePlayers[id] = false;
+                                                // ако няма останали фигури, играчът се изважда от играта (губи):
+                                                this.surrender(new Message_Board_Surrender(figureTo.username, this.board.boardId, figureTo.username));
                                             }
                                             // фигурата от началното поле се премества в крайното:
                                             this.board.boardFigures[to.row][to.col] = figureFrom;
@@ -119,14 +120,35 @@ public abstract class GameLogic {
                     if (this.isGameFinished()) {
                         // прекратяване на играта и регистриране на играта в базата данни:
                         this.gameManager.endGame(board);
-                    }
-                    {
-                        // ТЕСТ - автоматично прекратяване на хода на играча след едно преместване:
-                        this.board.currentPlayer = (this.board.currentPlayer + 1) % this.board.usernames.length;
+                    } else {
+                        // ако играта не е приключила, но ходът е приключил:
+                        if (isTurnFinished()) {
+                            this.endTurn(new Message_Board_EndTurn(usnCurrent, this.board.boardId, usnCurrent, null));
+                        }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Проверява дали текущият ход е приключил.
+     *
+     * @return true, ако ходът е приключил, в противен случай - false
+     */
+    public synchronized boolean isTurnFinished() {
+        int currentPlayerId = this.board.currentPlayer;
+        String currentPlayerName = this.board.usernames[currentPlayerId];
+        HashSet<Figure> figures = this.board.playerFigures.get(currentPlayerName);
+        Iterator<Figure> it = figures.iterator();
+        boolean isFinished = true; // приема се, че няма възможни за местене фигури, и се търси противното:
+        while (it.hasNext() && isFinished) {
+            Figure f = it.next();
+            if (f.canMove()) {
+                isFinished = false;
+            }
+        }
+        return isFinished;
     }
 
     public final synchronized void endTurn(Message_Board_EndTurn message) {
@@ -136,6 +158,12 @@ public abstract class GameLogic {
                 String usnCurrent = this.board.usernames[this.board.currentPlayer];
                 // ако играчът, изпратил съобщението, е на ход:
                 if (usnMessage.equals(usnCurrent)) {
+                    // рестартиране на броячите на извършени ходове за фигурите на играча:
+                    HashSet<Figure> figures = this.board.playerFigures.get(usnCurrent);
+                    Iterator<Figure> it = figures.iterator();
+                    while (it.hasNext()) {
+                        it.next().movesReset();
+                    }
                     // предаване на хода на следващия активен играч:
                     do {
                         this.board.currentPlayer = (this.board.currentPlayer + 1) % (this.board.usernames.length);
@@ -153,6 +181,7 @@ public abstract class GameLogic {
         if (!(this.isGameFinished())) {
             if (message != null) {
                 String usnMessage = message.username;
+                // играчът, изпратил съобщението, е играчът, който се предава:
                 message.playerSurrenders = usnMessage;
                 for (int i = 0; i < this.board.usernames.length; i++) {
                     this.gameManager.sendMessage(new Message_Board_Surrender(this.board.usernames[i], this.board.boardId, usnMessage));
@@ -178,8 +207,6 @@ public abstract class GameLogic {
                 }
             }
         }
-        // TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public final synchronized boolean isGameFinished() {

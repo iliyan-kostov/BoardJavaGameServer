@@ -13,6 +13,16 @@ public class Figure {
     public BoardCoords boardCoords;
 
     /**
+     * брой разрешени премествания на фигура в рамките на един ход
+     */
+    public static final int MOVESMAX = 1;
+
+    /**
+     * брой извършени премествания в рамките на текущия ход
+     */
+    public int movesDone;
+
+    /**
      * собственик на фигурата
      */
     public final String username;
@@ -20,5 +30,24 @@ public class Figure {
     public Figure(BoardCoords boardCoords, String username) {
         this.boardCoords = new BoardCoords(boardCoords.row, boardCoords.col);
         this.username = username;
+        this.movesDone = 0;
+    }
+
+    public final boolean canMove() {
+        return (this.movesDone < Figure.MOVESMAX);
+    }
+
+    /**
+     * Рестартира брояча на извършени премествания за фигурата.
+     */
+    public final synchronized void movesReset() {
+        this.movesDone = 0;
+    }
+
+    /**
+     * Увеличава броя извършени премествания в рамките на хода.
+     */
+    public final synchronized void movesMake() {
+        this.movesDone++;
     }
 }

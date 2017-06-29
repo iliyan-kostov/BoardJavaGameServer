@@ -287,6 +287,33 @@ public class Database {
         return result;
     }
 
+    /**
+     * Returns the maximum existing board id in the database.
+     *
+     * @return the maximum existing board id in the database
+     */
+    public synchronized int getMaxBoardId() {
+        try (Connection conn = DriverManager.getConnection(this.connectionString)) {
+            conn.setAutoCommit(false);
+            String string1
+                    = "SELECT MAX(BoardId) AS Max"
+                    + " FROM Games;";
+            PreparedStatement statement1 = conn.prepareStatement(string1);
+            ResultSet result = statement1.executeQuery();
+            if (result.next()) {
+                // returns the current max:
+                return result.getInt("Max");
+            } else {
+                // no games regiistered yet:
+                return 1;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+        }
+        return 1;
+    }
+
     /*
     // TEST:
     public static void main(String[] args) {

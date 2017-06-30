@@ -36,7 +36,8 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
         this.queueByMode.put(4, new LinkedList<>());
         this.queueByMode.put(6, new LinkedList<>());
         this.queueByUser = new HashMap<>();
-        this.nextBoardId = 1;
+        // get next board id from database:
+        this.nextBoardId = this.server.database.getMaxBoardId() + 1;
     }
 
     public synchronized void queueRemoveUser(String username) {
@@ -73,12 +74,12 @@ public class GameManager implements PropertyChangeListener, IMessageSender, IMes
 
     public synchronized void startGame(String[] usernames, int boardShape) {
         // TODO
-        Board_Serverside board = new Board_Serverside(boardShape, nextBoardId, usernames, this, this.server);
+        Board_Serverside board = new Board_Serverside(boardShape, this.nextBoardId, usernames, this, this.server);
         this.boardsById.put(board.boardId, board);
         for (int i = 0; i < usernames.length; i++) {
             this.boardsByUsername.put(usernames[i], board);
         }
-        nextBoardId++;
+        this.nextBoardId++;
         // send messages to the players in the game:
         Message_Board_GameStarted msg = new Message_Board_GameStarted(null, board.boardId, boardShape, usernames);
         for (int i = 0; i < boardShape; i++) {

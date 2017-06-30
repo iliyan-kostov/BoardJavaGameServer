@@ -1,6 +1,7 @@
 package game.board;
 
 import apps.NetClient;
+import game.lobby.PlayerStat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -167,7 +168,7 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
     @Override
     public synchronized void handleEndTurn(Message_Board_EndTurn message) {
         // TODO
-        System.out.println("[Client] Received Message_Board_EndTurn !!! IMPLEMENT THE METHOD !!!");
+        System.out.println("[Client] Received Message_Board_EndTurn : " + message.playerTurnEnds);
         System.out.flush();
         // =======================================================================================
         // =======================================================================================
@@ -176,7 +177,17 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
     @Override
     public synchronized void handleEndGame(Message_Board_EndGame message) {
         // TODO
-        System.out.println("[Client] Received Message_Board_EndGame !!! IMPLEMENT THE METHOD !!!");
+        System.out.println("[Client] Received Message_Board_EndGame : ");
+        System.out.println("[Client]          Stats before game: Player // Won // Lost");
+        for (int i = 0; i < message.playerStatsOld.length; i++) {
+            PlayerStat psOld = message.playerStatsOld[i];
+            System.out.println("[Client]              " + psOld.playerName + " // " + psOld.gamesWon + " // " + psOld.gamesLost);
+        }
+        System.out.println("[Client]          Stats after game: Player // Won // Lost");
+        for (int i = 0; i < message.playerStatsOld.length; i++) {
+            PlayerStat psNew = message.playerStatsNew[i];
+            System.out.println("[Client]              " + psNew.playerName + " // " + psNew.gamesWon + " // " + psNew.gamesLost);
+        }
         System.out.flush();
         // =======================================================================================
         // =======================================================================================
@@ -185,7 +196,7 @@ public class Board_Clientside extends Board implements IMessageHandler, IMessage
     @Override
     public synchronized void handleSurrender(Message_Board_Surrender message) {
         // TODO
-        System.out.println("[Client] Received Message_Board_Surrender !!! IMPLEMENT THE METHOD !!!");
+        System.out.println("[Client] Received Message_Board_Surrender : " + message.playerSurrenders);
         System.out.flush();
         // =======================================================================================
         // =======================================================================================
